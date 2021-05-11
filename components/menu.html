@@ -1,0 +1,61 @@
+<ul class="menu">
+  menu
+</ul>
+<div class="menu-content">
+  <div class="tabs"></div>
+  <div class="details"></div>
+</div>
+
+<script>
+  (function () {
+    var menuData = [];
+    $.ajax({
+      url: "/menu",
+      type: "get",
+      dataType: "json",
+      success: function (res) {
+        menuData = res.data;
+        renderMenuList(res.data);
+      },
+    });
+    function renderMenuList(data) {
+      var oLiArray = data.map(function (item) {
+        var oAs = item.titles.map(function (title) {
+          return `<a href="${title.href}">${title.name}</a>`;
+        });
+        return `<li class="menu-item">${oAs.join("/")}</li>`;
+      });
+      $(".menu").html(oLiArray.join(""));
+    }
+
+    $(".menu").on("mouseenter", "li", function () {
+      $(this).addClass("menu-active").siblings().removeClass("menu-active");
+      var index = $(this).index();
+      renderMenuContent(menuData[index].content);
+    });
+    function renderMenuContent(data) {
+      var tabsData = data.tabs;
+      var detailsData = data.details;
+      var tabsArr = tabsData.map(function (tab) {
+        return `<a href="${tab.href}">${tab.name}<i class="iconfont">&#xe625;</i></a>`;
+      });
+
+      $(".menu-content > .tabs").html(tabsArr.join(""));
+      var oDl = detailsData.map(function (detail) {
+        var oDt = `<dt class="menu-item-title"><a href="#">${detail.category}<i class="iconfont">&#xe625;</i></a></dt>`;
+        var oAs = detail.items.map(function (item) {
+          return `<a href="${item.href}">${item.name}</a>`;
+        });
+        var oDD = `<dd class="menu-item">${oAs.join("")}</dd>`;
+        return `<dl class="menu-item-details">${oDt}${oDD}</dl>`;
+      });
+      $(".menu-content > .details").html(oDl.join(""));
+      $(".menu-content").show();
+    }
+
+    $(".fs-1").mouseleave(function () {
+      $(".menu-content").hide();
+      $(".menu-active").removeClass("menu-active");
+    });
+  })();
+</script>
